@@ -1,4 +1,4 @@
-# 📈 Sales Forecasting System
+#  Sales Forecasting System
 
 A production-quality, end-to-end time-series forecasting system for US state-level beverage sales.
 
