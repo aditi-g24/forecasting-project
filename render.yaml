@@ -12,7 +12,7 @@ services:
         value: 3.11.9
 
       - key: ARTIFACTS_DIR
-        value: artifacts
+        value: /opt/render/project/src/artifacts
 
       - key: DATA_PATH
         value: data/sales_data.xlsx
