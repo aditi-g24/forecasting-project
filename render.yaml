@@ -2,13 +2,21 @@ services:
   - type: web
     name: sales-forecasting-api
     env: python
+    plan: free
+
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+
       - key: ARTIFACTS_DIR
         value: artifacts
+
       - key: DATA_PATH
         value: data/sales_data.xlsx
+
     disk:
       name: artifacts-storage
       mountPath: /opt/render/project/src/artifacts
