@@ -162,8 +162,27 @@ def train(request: TrainRequest, background_tasks: BackgroundTasks):
 @app.get("/states", tags=["Data"])
 def list_states():
     """List all states that have been trained."""
-    results = _load_all_results()
-    return {"states": sorted(results.keys()), "count": len(results)}
+    # Try all_results.json first
+    path = ARTIFACTS_DIR / "all_results.json"
+    if path.exists():
+        with open(path) as f:
+            results = json.load(f)
+        return {"states": sorted(results.keys()), "count": len(results)}
+    
+    # Fallback: scan for per-state summary.json files
+    if ARTIFACTS_DIR.exists():
+        trained = [
+            d.name.replace("_", " ")
+            for d in ARTIFACTS_DIR.iterdir()
+            if d.is_dir() and (d / "summary.json").exists()
+        ]
+        if trained:
+            return {"states": sorted(trained), "count": len(trained)}
+    
+    raise HTTPException(
+        status_code=404,
+        detail="No training results found. Run POST /train first."
+    )
 
 
 @app.get("/models", tags=["Data"])

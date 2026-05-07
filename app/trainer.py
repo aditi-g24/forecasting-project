@@ -198,12 +198,7 @@ def _plot_forecast(weekly, forecast_df, results, state, out_dir):
 # FULL PIPELINE
 # ──────────────────────────────────────────────────────────────────────────────
 
-def run_pipeline(data_path: str, artifacts_dir: str, states: list = None,
-                 train_lstm: bool = True):
-    """
-    Train all models for every state (or a subset).
-    Saves a master `all_results.json` in artifacts_dir.
-    """
+def run_pipeline(data_path, artifacts_dir, states=None, train_lstm=True):
     artifacts_dir = Path(artifacts_dir)
     artifacts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -214,19 +209,25 @@ def run_pipeline(data_path: str, artifacts_dir: str, states: list = None,
 
     print(f"\nTraining on {len(all_states)} states …\n")
 
+    # Load existing results so we can resume
+    results_path = artifacts_dir / "all_results.json"
     all_results = {}
+    if results_path.exists():
+        with open(results_path) as f:
+            all_results = json.load(f)
+
     for state in all_states:
         try:
             summary = train_state(state, df, artifacts_dir, train_lstm=train_lstm)
             all_results[state] = summary
+            #  Save after EVERY state
+            with open(results_path, "w") as f:
+                json.dump(all_results, f, indent=2)
+            print(f"   Saved results for {state}")
         except Exception as e:
             print(f"  ERROR for {state}: {e}")
 
-    # Save master results
-    with open(artifacts_dir / "all_results.json", "w") as f:
-        json.dump(all_results, f, indent=2)
-
-    print(f"\n\n✅  Training complete.  Results saved to {artifacts_dir}/all_results.json")
+    print(f"\n Training complete. Results saved to {results_path}")
     return all_results
 
 
